@@ -1,8 +1,13 @@
 const booksTable = require("../models/book.model")
 const db = require("../db")
-const { eq } = require('drizzle-orm')
+const { eq, ilike } = require('drizzle-orm') // ilike wont check for exact value of search 
 
-exports.getAllBooks = function (req, res) {
+exports.getAllBooks = async function (req, res) {
+    const search = req.query.search
+    if (search) {
+        const books = await db.select().from(booksTable).where(ilike(booksTable.title, `%${search}%`)) // its like regex
+        return res.json(books);
+    }
     const books = await db.select().from(booksTable)
     return res.json(books);
 }

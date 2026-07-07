@@ -4,8 +4,12 @@ const { eq, ilike } = require('drizzle-orm') // ilike wont check for exact value
 
 exports.getAllBooks = async function (req, res) {
     const search = req.query.search
+    // if (search) {
+    //     const books = await db.select().from(booksTable).where(ilike(booksTable.title, `%${search}%`)) // its like regex
+    //     return res.json(books);
+    // }
     if (search) {
-        const books = await db.select().from(booksTable).where(ilike(booksTable.title, `%${search}%`)) // its like regex
+        const books = await db.select().from(booksTable).where(sql`to_tsvector('english', ${booksTable.title}) @@ to_tsquery('english', ${search})`);
         return res.json(books);
     }
     const books = await db.select().from(booksTable)
